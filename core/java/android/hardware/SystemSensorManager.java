@@ -157,11 +157,24 @@ public class SystemSensorManager extends SensorManager {
             Log.e(TAG, "maxBatchReportLatencyUs and delayUs should be non-negative");
             return false;
         }
-        if (mSensorListeners.size() >= MAX_LISTENER_COUNT) {
-            throw new IllegalStateException("register failed, "
-                + "the sensor listeners size has exceeded the maximum limit "
-                + MAX_LISTENER_COUNT);
-        }
+        if (sensor.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
+           String pkgName = mContext.getPackageName();
+           Log.w(TAG, "Preventing " + pkgName + " from draining battery using " +
+                  "significant motion sensor");
+           Log.w(TAG,"Here :", new Throwable());
+           return true;
+        } else if (sensor.getType() == Sensor. TYPE_ACCELEROMETER) {
+           String pkgName = mContext.getPackageName();
+           String opPkgName = mContext.getOpPackageName();
+           if(opPkgName.equals("com.google.android.gms") ) {
+               Log.w(TAG, "Preventing " + pkgName + "(" + opPkgName +") from draining battery using " +
+                      "accelerometer sensor");
+               Log.w(TAG,"Here :", new Throwable());
+               return true;
+           }
+       }
+
+
 
         // Invariants to preserve:
         // - one Looper per SensorEventListener
@@ -227,6 +240,23 @@ public class SystemSensorManager extends SensorManager {
                     + "the trigger listeners size has exceeded the maximum limit "
                     + MAX_LISTENER_COUNT);
         }
+
+        if (sensor.getType() == Sensor.TYPE_SIGNIFICANT_MOTION) {
+      String pkgName = mContext.getPackageName();
+      Log.w(TAG, "Preventing " + pkgName + " from draining battery using " +
+             "significant motion sensor");
+      Log.w(TAG,"Here :", new Throwable());
+      return true;
+      } else if (sensor.getType() == Sensor. TYPE_ACCELEROMETER) {
+      String pkgName = mContext.getPackageName();
+      String opPkgName = mContext.getOpPackageName();
+      if(opPkgName.equals("com.google.android.gms") ) {
+          Log.w(TAG, "Preventing " + pkgName + "(" + opPkgName +") from draining battery using " +
+                 "accelerometer sensor");
+          Log.w(TAG,"Here :", new Throwable());
+          return true;
+      }
+  }
 
         synchronized (mTriggerListeners) {
             TriggerEventQueue queue = mTriggerListeners.get(listener);
